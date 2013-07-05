@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+find_pid () {
+  echo $(pgrep Dropbox)
+}
+
+stopped () {
+  local pid=$1
+  local status=
+
+  local process=$(ps axo state,pid | egrep ".* ${pid}$")
+  local state=${process:0:1}
+
+  if [ "$state" = "T" ]; then
+    status=${pid}
+  fi
+
+  echo $status
+}
+
+stop () {
+  kill -STOP $1
+}
+
+cont () {
+  kill -CONT $1
+}
+
+pid=$(find_pid)
+
+if [ "$pid" != "" -a "$(stopped $pid)" != "" ]; then
+  cont $pid
+  echo "Resumed Dropbox"
+elif [ $pid ]; then
+  stop $pid
+  echo "Stopped Dropbox"
+else
+  echo "Dropbox Not Running"
+fi
